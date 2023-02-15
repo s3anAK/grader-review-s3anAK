@@ -1,4 +1,4 @@
-CPATH='.:lib/hamcrest-core-1.3.jar:lib/junit-4.13.2.jar'
+CPATH='.;../lib/hamcrest-core-1.3.jar;../lib/junit-4.13.2.jar'
 
 rm -rf student-submission
 git clone $1 student-submission
@@ -14,3 +14,44 @@ else
 fi
 
 cp ../TestListExamples.java ./
+javac -cp $CPATH *.java
+
+if [[ $? -eq 1 ]]
+then
+    echo 'The tests did not compile'
+else
+    echo 'The tests compiled!'
+
+    javac ListExamples.java
+
+    if [[ $? -eq 1 ]]
+    then
+        echo 'ListExamples did not compile'
+    else
+        echo 'ListExamples compiled!'
+
+        java -cp $CPATH org.junit.runner.JUnitCore TestListExamples > output.txt
+
+        failures=`grep -Po 'Failures:\s\K.' output.txt`
+        OK=`grep -Po 'OK\s\(\K.' output.txt`
+        testsRun=`grep -Po 'Tests\srun:\s\K.' output.txt`
+
+        if [[ -z $failures ]]
+        then
+            echo Your grade was 100%!
+            echo You passed $OK test\(s\)!
+        else
+
+            echo There are $failures failure\(s\)
+
+            grade=$((($testsRun-$failures)/$testsRun))%
+
+            echo Your grade was $grade
+        fi
+    fi
+fi
+
+
+
+
+    
